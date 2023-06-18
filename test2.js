@@ -20,14 +20,26 @@ function readCsvSaveTxt (DIR_INPUT_FILE, DIR_OUTPUT_FILE, DIR_OUTPUT_FOLDER){
         console.log('Folder exist!!!', DIR_OUTPUT_FOLDER)
     )
 
-    const readStream = fs.createReadStream(DIR_INPUT_FILE);
-    const writeStream= fs.createWriteStream(DIR_OUTPUT_FILE);
-
     try {
+        let readStream;
+        let writeStream;
+
+        if (fs.createReadStream(DIR_INPUT_FILE)){
+            readStream = fs.createReadStream(DIR_INPUT_FILE);
+        } else (
+            console.error('read stream error')
+        )
+
+        if (fs.createWriteStream(DIR_OUTPUT_FILE)){
+            writeStream = fs.createWriteStream(DIR_OUTPUT_FILE);
+        } else (
+            console.error('write stream error')
+        )
+
         readStream.pipe(csv()).pipe(writeStream);
         console.log('File was converted!');
     } catch (e){
-        console.log(e)
+        console.error(e)
     }
 }
 
