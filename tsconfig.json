@@ -1,0 +1,10 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+  },
+  "exclude": ["node_modules"],
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true,
+}
