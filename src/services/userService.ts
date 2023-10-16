@@ -1,35 +1,30 @@
-import createUser from '../data-access/createUser';
-import getUserById from '../data-access/getUserById';
-import getUsers from '../data-access/getUsers';
-import updateUser from '../data-access/updateUser';
-import {User, UserUpdates} from '../models/types';
+import * as Repository from '../data-access/dataBaseAccess';
+import {User} from '../models/models.User';
+import {UserUpdates} from "../models/types";
 
 export class UserService {
     public async createUser(user: User) {
-        return await createUser(user);
+        return await Repository.createUser(user);
     }
 
     public async getUserById(id: string) {
-        return await getUserById(id);
+        return await Repository.getUserById(id);
     }
 
     public async updateUser(id: string, userUpdates: UserUpdates) {
-        return await updateUser(id, userUpdates);
+        return await Repository.updateUser(id, userUpdates);
     }
 
     public async deleteUser(
         id: string,
-        userUpdates: UserUpdates = { is_deleted: true }
+        userUpdates: UserUpdates = {is_deleted: true}
     ) {
-        return await updateUser(id, userUpdates);
+        return await Repository.updateUser(id, userUpdates);
     }
 
-    public async getUsers(
-        limit: string | undefined,
-        substring: string | undefined
-    ) {
+    public async getUsers(substring?: string, limit?: number) {
         const updatedLimit = limit ? +limit : undefined;
         const updatedSubstring = substring ? substring : '';
-        return await getUsers(updatedLimit, updatedSubstring);
+        return await Repository.getUsers(updatedLimit, updatedSubstring);
     }
 }
