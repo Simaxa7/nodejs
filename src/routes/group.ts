@@ -1,4 +1,4 @@
-import express, {Response} from 'express';
+import express, {Response, NextFunction, Request} from 'express';
 import {GroupService} from '../services/groupService';
 import {
     groupBodyValidatorOnCreate,
@@ -14,6 +14,7 @@ import {
     ParamsIDSchema,
     UpdateUserBodySchema,
 } from '../validation/types';
+import { methodLoggerMiddleware } from '../middlewares/methodLoggerMiddleware';
 
 const group = express.Router();
 const groupService = new GroupService();
@@ -27,15 +28,16 @@ const groupService = new GroupService();
 group.post(
     '/group',
     groupBodyValidatorOnCreate,
-    async (req: ValidatedRequest<CreateGroupBodySchema>, res: Response) => {
+    methodLoggerMiddleware,
+    async (req: ValidatedRequest<CreateGroupBodySchema>,
+           res: Response,
+           next: NextFunction) => {
         try {
             const group: Groups = {...req.body};
             const result = await groupService.createGroup(group);
             res.status(200).json({createdGroup: result});
         } catch (e) {
-            res
-                .status(500)
-                .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+            next(e);
         }
     }
 );
@@ -44,30 +46,30 @@ group.post(
 group.get(
     '/group/:id',
     paramsIdValidator,
-    async (req: ValidatedRequest<ParamsIDSchema>, res: Response) => {
+    methodLoggerMiddleware,
+    async (req: ValidatedRequest<ParamsIDSchema>,
+           res: Response,
+           next: NextFunction) => {
         try {
             const {id} = req.params;
             const result = await groupService.getGroupById(id);
-            result
-                ? res.status(200).json({group: result})
-                : res.status(404).json({message: `no groups with id ${id}`});
+            res.status(200).json({group: result});
         } catch (e) {
-            res
-                .status(500)
-                .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+            next(e);
         }
     }
 );
 
 // http://localhost:3000/groups
-group.get('/groups', async (req, res) => {
+group.get(
+    '/groups',
+    methodLoggerMiddleware,
+    async (req, res, next: NextFunction) => {
     try {
         const result = await groupService.getGroups();
         res.status(200).json({groups: result});
     } catch (e) {
-        res
-            .status(500)
-            .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+        next(e);
     }
 });
 
@@ -80,20 +82,18 @@ group.put(
     '/group/:id',
     groupBodyValidatorOnUpdate,
     paramsIdValidator,
+    methodLoggerMiddleware,
     async (
         req: ValidatedRequest<ParamsIDSchema & UpdateUserBodySchema>,
-        res: Response
+        res: Response,
+        next: NextFunction
     ) => {
         try {
             const {id} = req.params;
             const result = await groupService.updateGroup(id, req.body);
-            result
-                ? res.status(200).json({updatedGroup: result})
-                : res.status(404).json({message: `no groups with id ${id}`});
+            res.status(200).json({updatedGroup: result});
         } catch (e) {
-            res
-                .status(500)
-                .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+            next(e);
         }
     }
 );
@@ -102,17 +102,14 @@ group.put(
 group.delete(
     '/group/:id',
     paramsIdValidator,
-    async (req: ValidatedRequest<ParamsIDSchema>, res: Response) => {
+    methodLoggerMiddleware,
+    async (req: ValidatedRequest<ParamsIDSchema>, res: Response, next: NextFunction) => {
         try {
             const {id} = req.params;
-            const result = await groupService.deleteGroup(id);
-            result
-                ? res.status(200).json({message: `group with id ${id} deleted`})
-                : res.status(404).json({message: `no groups with id ${id}`});
+            groupService.deleteGroup(id);
+            res.status(200).json({message: `group with id ${id} deleted`});
         } catch (e) {
-            res
-                .status(500)
-                .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+            next(e);
         }
     }
 );
@@ -126,9 +123,11 @@ group.post(
     '/group/:id/addusers',
     paramsIdValidator,
     groupRelationsBodyValidator,
+    methodLoggerMiddleware,
     async (
         req: ValidatedRequest<ParamsIDSchema & CreateGroupRelationsBodySchema>,
-        res: Response
+        res: Response,
+        next: NextFunction
     ) => {
         try {
             const {id} = req.params;
@@ -136,9 +135,7 @@ group.post(
             const result = await groupService.addUsersToGroup(id, userIds);
             res.status(200).json({createdGroupRelations: result});
         } catch (e) {
-            res
-                .status(500)
-                .json({message: e instanceof Error ? e.message : 'Unknown Error'});
+            next(e);
         }
     }
 );
