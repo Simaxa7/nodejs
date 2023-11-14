@@ -27,4 +27,8 @@ export class UserService {
         const updatedSubstring = substring ? substring : '';
         return await Repository.getUsers(updatedLimit, updatedSubstring);
     }
+
+    public async getUserByCredentials(login: string, password: string) {
+        return await Repository.getUserByCredentials(login, password);
+    }
 }

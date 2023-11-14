@@ -207,3 +207,17 @@ export async function addUsersToGroup(groupId: string, userIds: string[]) {
         }
     );
 }
+
+export async function getUserByCredentials(login: string, password: string) {
+    return await AppDataSource.transaction(
+        async (transactionalEntityManager) => {
+            return await transactionalEntityManager
+                .getRepository(User)
+                .createQueryBuilder('user')
+                .where('user.login = :login', {login})
+                .andWhere('user.password = :password', {password})
+                .andWhere('user.is_deleted = :is_deleted', {is_deleted: false})
+                .getOne();
+        }
+    );
+}

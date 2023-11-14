@@ -1,4 +1,4 @@
-import express, {Response, NextFunction, Request} from 'express';
+import express, {Response, NextFunction} from 'express';
 import {GroupService} from '../services/groupService';
 import {
     groupBodyValidatorOnCreate,
