@@ -7,6 +7,7 @@ import {
     querySubstringLimitSchema,
     updateGroupBodySchema,
     updateUserBodySchema,
+    getUserByCredentialsBodySchema,
 } from './schemas';
 
 const validator = createValidator();
@@ -18,3 +19,4 @@ export const userQuerySubstringLimitValidator = validator.query(querySubstringLi
 export const groupBodyValidatorOnCreate = validator.body(createGroupBodySchema)
 export const groupBodyValidatorOnUpdate = validator.body(updateGroupBodySchema)
 export const groupRelationsBodyValidator = validator.body(createGroupRelationsBodySchema)
+export const userBodyCredentialsValidator = validator.body(getUserByCredentialsBodySchema)

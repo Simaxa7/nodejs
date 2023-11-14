@@ -51,3 +51,13 @@ export const createGroupRelationsBodySchema = Joi.object({
         Joi.string().min(36).max(36)
     ),
 });
+
+export const getUserByCredentialsBodySchema = Joi.object({
+    login: Joi.string().alphanum().min(3).max(10).required(),
+    password: Joi.string()
+        .alphanum()
+        .regex(/[0-9][a-zA-Z]|[a-zA-Z][0-9]/)
+        .min(8)
+        .max(15)
+        .required(),
+});

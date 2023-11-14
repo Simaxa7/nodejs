@@ -3,6 +3,7 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "target": "ES2022"
   },
   "exclude": ["node_modules"],
   "emitDecoratorMetadata": true,

@@ -1,20 +1,25 @@
 import express, {Response, NextFunction} from 'express';
+import {ValidatedRequest} from 'express-joi-validation';
+import * as jwt from 'jsonwebtoken';
+
 import {UserService} from '../services/userService';
 import {
     userBodyValidatorOnCreate,
     userBodyValidatorOnUpdate,
     paramsIdValidator,
     userQuerySubstringLimitValidator,
+    userBodyCredentialsValidator,
 } from '../validation/validators';
 import {User} from '../models/models.User';
-import {ValidatedRequest} from 'express-joi-validation';
 import {
     CreateUserBodySchema,
     ParamsIDSchema,
     QuerySubstringLimitSchema,
     UpdateUserBodySchema,
+    GetUserByCredentialsBodySchema,
 } from '../validation/types';
-import { methodLoggerMiddleware } from '../middlewares/methodLoggerMiddleware';
+import {methodLoggerMiddleware} from '../middlewares/methodLoggerMiddleware';
+import {LoginError} from '../Errors/loginErrors';
 
 const user = express.Router();
 const userService = new UserService();
@@ -116,5 +121,32 @@ user.get('/error1', methodLoggerMiddleware, function() {
 user.get('/error2', methodLoggerMiddleware, function() {
     new Promise((res,rej)=>{rej('Test Error2 I AM UNHANDLED PROMISE REJECTION')})
 });
+
+user.post(
+    '/user/login',
+    userBodyCredentialsValidator,
+    async (
+        req: ValidatedRequest<GetUserByCredentialsBodySchema>,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const { login, password } = req.body;
+
+            const result = await userService.getUserByCredentials(login, password);
+
+            if (result instanceof User) {
+                const payload = { sub: 'api access', userId: result.id };
+                const secret = process.env.SECRET as string;
+                const token = jwt.sign(payload, secret, { expiresIn: `${process.env.EXPIRESIN}ms` });
+                res.status(200).json({ token });
+            } else {
+                throw new LoginError('Bad Username/Passsword combination')
+            }
+        } catch (e) {
+            next(e);
+        }
+    }
+);
 
 export default user;
